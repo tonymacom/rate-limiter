@@ -11,9 +11,12 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scripting.support.ResourceScriptSource;
 
 import java.util.List;
@@ -83,11 +86,23 @@ public class RouteAutoConfiguration {
         return redisScript;
     }
 
+    @Bean(name="rateLimiterRedisTemplate")
+    public RedisTemplate<?, ?> rateLimiterRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        //ValueSerializer必须使用StringRedisSerializer对象
+        template.setValueSerializer(new StringRedisSerializer());
+        template.setKeySerializer(new StringRedisSerializer());
+        template.afterPropertiesSet();
+        return template;
+    }
+
+
     @Bean
     @ConditionalOnMissingBean
-    public RedisRateLimiter redisRateLimiter(RedisTemplate<String,String> redisTemplate,
+    public RedisRateLimiter redisRateLimiter(@Qualifier("rateLimiterRedisTemplate") RedisTemplate<String,String> rateLimiterRedisTemplate,
                                              @Qualifier(RedisRateLimiter.REDIS_SCRIPT_NAME) RedisScript<List<Long>> redisScript) {
-        return new RedisRateLimiter(redisTemplate, redisScript);
+        return new RedisRateLimiter(rateLimiterRedisTemplate, redisScript);
     }
 
     @Bean
