@@ -1,15 +1,11 @@
 package com.tony.unit.filter;
 
-import com.tony.unit.core.CachingRouteLocator;
 import com.tony.unit.core.DefaultLimitFilterChain;
 import com.tony.unit.core.Route;
 import com.tony.unit.core.RouteLocator;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -27,7 +23,7 @@ import java.io.IOException;
  */
 @Slf4j
 @Data
-public class RateLimiterFilter implements Filter, ApplicationContextAware {
+public class RateLimiterFilter implements Filter{
 
 
     private RouteLocator routeLocator;
@@ -79,12 +75,5 @@ public class RateLimiterFilter implements Filter, ApplicationContextAware {
     public void destroy() {
 
     }
-
-    @Override
-    public void setApplicationContext(ApplicationContext context) throws BeansException {
-        this.routeLocator = context.getBean(CachingRouteLocator.class);
-
-    }
-
 
 }
