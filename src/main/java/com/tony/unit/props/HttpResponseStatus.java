@@ -2,6 +2,9 @@ package com.tony.unit.props;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 /**
  * @author www.yamibuy.com
  * @desc :
@@ -23,6 +26,13 @@ public enum HttpResponseStatus {
     HttpResponseStatus(Integer value, String reasonPhrase) {
         this.value = value;
         this.reasonPhrase = reasonPhrase;
+    }
+
+    public static boolean existsValue(Integer t_value) {
+        if (null == t_value) {
+            return false;
+        }
+        return Stream.of(HttpResponseStatus.values()).anyMatch(httpResponseStatus -> httpResponseStatus.value.equals(t_value));
     }
 
 }

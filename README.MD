@@ -10,30 +10,49 @@
 
 ```$xslt
 
-# header类型的所有请求全部走redis 限流(3个请求/40s)
+# 对/output请求全部拒绝
+#request.limit.routes[0].path=/output
+#request.limit.routes[0].predicate.type=always
+#request.limit.routes[0].filter.type=Reject
+
+# 对/output请求进行限流, 3次每10秒钟.
+#request.limit.routes[0].path=/output
+#request.limit.routes[0].predicate.type=always
+#request.limit.routes[0].filter.type=RateLimiter
+#request.limit.routes[0].filter.args.replenish_rate=3
+#request.limit.routes[0].filter.args.burst_capacity=3
+#request.limit.routes[0].filter.args.time_unit_second=10
+
+# 对请求头中token=aaaaa或者bbbbb的/output请求拒绝
 #request.limit.routes[0].path=/output
 #request.limit.routes[0].predicate.type=header
-#request.limit.routes[0].filter.type=RateLimiter
-# 表示每40s往令牌桶中存放3个请求令牌
-#request.limit.routes[0].filter.args.replenish_rate=3
-# 表示令牌桶最大容量为3, 即初始给3个请求令牌.
-#request.limit.routes[0].filter.args.burst_capacity=3
-#request.limit.routes[0].filter.args.time_unit_second=40
+#request.limit.routes[0].predicate.args.name=token
+#request.limit.routes[0].predicate.args.values=aaaaa, bbbbb
+#request.limit.routes[0].filter.type=Reject
 
-# user_ids为123,或者234的用户, 该请求拒绝.
+# 对解析token中user_id=123或者234的/output请求拒绝
 #request.limit.routes[0].path=/output
 #request.limit.routes[0].predicate.type=userId
 #request.limit.routes[0].predicate.args.user_ids=123,234
 #request.limit.routes[0].filter.type=Reject
 
+# 对解析token中user_id可以匹配正则\d{3}的/output请求拒绝
+#request.limit.routes[0].path=/output
+#request.limit.routes[0].predicate.type=userId
+#request.limit.routes[0].predicate.args.regexp=\\d{3}
+#request.limit.routes[0].filter.type=Reject
 
-# ips为10.30.10.211,10.30.10.212的用户走redis限流
-#request.limit.routes[1].path=/register
-#request.limit.routes[1].predicate.type=ip
-#request.limit.routes[1].predicate.args.ips=10.30.10.211,10.30.10.212
-#request.limit.routes[1].filter.type=RateLimiter
-#request.limit.routes[1].filter.args.replenish_rate=3
-#request.limit.routes[1].filter.args.burst_capacity=3
-#request.limit.routes[1].filter.args.time_unit_second=30 * 3600
+# 对来源ip为0:0:0:0:0:0:0:1或者10.30.10.212的/output请求拒绝
+#request.limit.routes[0].path=/output
+#request.limit.routes[0].predicate.type=ip
+#request.limit.routes[0].predicate.args.ips=0:0:0:0:0:0:0:1,10.30.10.212
+#request.limit.routes[0].filter.type=Reject
+
+# 对来源ip正则匹配0:0:0:0:0:0:0:1的/output请求拒绝
+request.limit.routes[0].path=/output
+request.limit.routes[0].predicate.type=ip
+request.limit.routes[0].predicate.args.regexp=0:0:0:0:0:0:0:1
+request.limit.routes[0].filter.type=Reject
+
 
 ```

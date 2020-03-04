@@ -8,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -26,12 +27,19 @@ public class UserIdLimitPredicateFactory extends AbstractLimitPredicateFactory<U
 
     @Override
     public LimitPredicate apply(Config config) {
-        List userIds = Arrays.asList(config.getUser_ids().split(","));
+
+        List userIds = new ArrayList();
+        if (!StringUtils.isEmpty(config.getUser_ids())) {
+            userIds.addAll(Arrays.asList(config.getUser_ids().split(",")));
+        }
         String regexp = config.getRegexp();
 
         return request -> {
             String token = request.getHeader("token");
             String dateId = getUserId(token);
+            if ((CollectionUtils.isEmpty(userIds) && StringUtils.isEmpty(regexp)) || StringUtils.isEmpty(dateId)) {
+                return false;
+            }
 
             if (!StringUtils.isEmpty(regexp)) {
                 return Pattern.matches(regexp, dateId);

@@ -3,6 +3,7 @@ package com.tony.unit.filter;
 import com.tony.unit.core.DefaultLimitFilterChain;
 import com.tony.unit.core.Route;
 import com.tony.unit.core.RouteLocator;
+import com.tony.unit.props.HttpResponseStatus;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,7 @@ public class RateLimiterFilter implements Filter{
         log.debug("RateLimiterFilter execute");
 
         HttpServletRequest request = (HttpServletRequest)servletRequest;
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         Route route1 = this.routeLocator.getRoutes().stream().filter(route -> {
 
@@ -63,11 +65,13 @@ public class RateLimiterFilter implements Filter{
         if (null != route1) {
             if (route1.getPredicate().test(request)) {
                 DefaultLimitFilterChain defaultLimitFilterChain = new DefaultLimitFilterChain(route1.getLimitFilter());
-                defaultLimitFilterChain.filter(request,(HttpServletResponse) servletResponse);
+                defaultLimitFilterChain.filter(request,response);
             }
         }
 
-        filterChain.doFilter(servletRequest, servletResponse);
+        if (!HttpResponseStatus.existsValue(response.getStatus())) {
+            filterChain.doFilter(servletRequest, servletResponse);
+        }
 
     }
 

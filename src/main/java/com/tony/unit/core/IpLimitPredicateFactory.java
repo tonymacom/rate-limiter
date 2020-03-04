@@ -6,6 +6,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -26,10 +27,18 @@ public class IpLimitPredicateFactory extends AbstractLimitPredicateFactory<IpLim
     @Override
     public LimitPredicate apply(Config config) {
 
-        List<String> ips = Arrays.asList(config.getIps().split(","));
+        List<String> ips = new ArrayList<>();
+        if (!StringUtils.isEmpty(config.getIps())) {
+            ips.addAll(Arrays.asList(config.getIps().split(",")));
+        }
+
         String regexp = config.getRegexp();
 
         return request -> {
+            if (CollectionUtils.isEmpty(ips) && StringUtils.isEmpty(regexp)) {
+                return false;
+            }
+
             String ip = getIpAddress(request) ;
 
             if (!StringUtils.isEmpty(regexp)) {

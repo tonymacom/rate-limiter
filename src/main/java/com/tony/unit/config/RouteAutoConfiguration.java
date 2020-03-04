@@ -39,6 +39,13 @@ public class RouteAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public AlwaysLimitPredicateFactory alwaysLimitPredicateFactory() {
+        return new AlwaysLimitPredicateFactory();
+    }
+
+
+    @Bean
+    @ConditionalOnMissingBean
     IpLimitPredicateFactory ipLimitPredicateFactory() {
         return new IpLimitPredicateFactory();
     }
