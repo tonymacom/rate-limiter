@@ -1,11 +1,11 @@
 package com.tony.unit.core;
 
 import com.tony.unit.config.AbstractLimitPredicateFactory;
-import com.yamibuy.ec.core.util.IPUtils;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -30,7 +30,7 @@ public class IpLimitPredicateFactory extends AbstractLimitPredicateFactory<IpLim
         String regexp = config.getRegexp();
 
         return request -> {
-            String ip = IPUtils.getIpAddress(request);
+            String ip = getIpAddress(request) ;
 
             if (!StringUtils.isEmpty(regexp)) {
                 return Pattern.matches(regexp, ip);
@@ -40,6 +40,43 @@ public class IpLimitPredicateFactory extends AbstractLimitPredicateFactory<IpLim
             return false;
         };
 
+    }
+
+    public static String getIpAddress(HttpServletRequest request) {
+        String ip = request.getHeader("CF-Connecting-IP");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Forwarded-For");
+        }
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+
+        if (ip != null && ip.contains(",")) {
+            ip = ip.substring(0, ip.indexOf(","));
+        }
+
+        return ip;
     }
 
     @Data

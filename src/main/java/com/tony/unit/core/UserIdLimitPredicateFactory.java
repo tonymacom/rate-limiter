@@ -1,11 +1,13 @@
 package com.tony.unit.core;
 
+import com.alibaba.fastjson.JSON;
 import com.tony.unit.config.AbstractLimitPredicateFactory;
-import com.yamibuy.ec.core.util.TokenUtil;
 import lombok.Data;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -29,7 +31,7 @@ public class UserIdLimitPredicateFactory extends AbstractLimitPredicateFactory<U
 
         return request -> {
             String token = request.getHeader("token");
-            String dateId = TokenUtil.convert(token).getData();
+            String dateId = getUserId(token);
 
             if (!StringUtils.isEmpty(regexp)) {
                 return Pattern.matches(regexp, dateId);
@@ -40,6 +42,29 @@ public class UserIdLimitPredicateFactory extends AbstractLimitPredicateFactory<U
             return false;
         };
 
+    }
+
+    public static String getUserId(String token) {
+        if (token != null && token.length() != 0) {
+            try {
+                return JSON.parseObject(decode(URLDecoder.decode(token, "utf-8"))).getString("data");
+            } catch (Exception var2) {
+                throw new RuntimeException("Token is invalid , Please ReLogin");
+            }
+        } else {
+            return "";
+        }
+    }
+
+    public static String decode(String str) {
+        byte[] bt;
+        try {
+            bt = Base64.decodeBase64(str);
+        } catch (Exception var3) {
+            throw new RuntimeException(var3);
+        }
+
+        return new String(bt);
     }
 
     @Data

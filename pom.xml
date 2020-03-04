@@ -49,13 +49,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.yamibuy</groupId>
-            <artifactId>ec-core</artifactId>
-            <version>1.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.16.12</version>
@@ -74,6 +67,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.51</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>

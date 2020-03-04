@@ -1,9 +1,9 @@
 package com.tony.unit.core;
 
-import com.yamibuy.ec.core.common.YamibuyException;
 import com.tony.unit.config.AbstractConfigurable;
+import com.tony.unit.props.HttpResponseStatus;
+import com.tony.unit.util.ResponseUtils;
 import lombok.Data;
-import org.springframework.http.HttpStatus;
 
 /**
  * @author www.yamibuy.com
@@ -32,7 +32,7 @@ public class RateLimiterLimitFilterFactory
             if (allowedResponse.isAllowed()) {
                 chain.filter(request,response);
             }else{
-                throw new YamibuyException(config.getStatusCode().getReasonPhrase());
+                ResponseUtils.sendMessage(response,config.getStatusCode());
             }
         };
     }
@@ -42,7 +42,7 @@ public class RateLimiterLimitFilterFactory
 
         private String routeKey;
 
-        private HttpStatus statusCode = HttpStatus.TOO_MANY_REQUESTS;
+        private HttpResponseStatus statusCode = HttpResponseStatus.TOO_MANY_REQUESTS;
 
         private RateLimiter rateLimiter;
     }
