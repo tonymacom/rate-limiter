@@ -14,9 +14,9 @@ import java.util.stream.Stream;
 @Getter
 public enum HttpResponseStatus {
 
-
-    NOT_ACCEPTABLE(900406, "Not Acceptable"),
-    TOO_MANY_REQUESTS(900429, "Too Many Requests"),
+    // 必须使用通用码, 如果使用自定义码, sleuth等组件将不认识扔出异常.
+    NOT_ACCEPTABLE(406, "Not Acceptable"),
+    TOO_MANY_REQUESTS(429, "Too Many Requests"),
     ;
 
     private Integer value;
